@@ -1,6 +1,6 @@
 const myLibrary = [];
 const libraryDiv = document.querySelector("#library");
-const addNewBookButton = document.querySelector("#addNewBook");
+const addNewBookButton = document.querySelector("#addNewBookButton");
 const addNewBookDialogue = document.querySelector("#addNewBookDialog");
 const addBookForm = document.querySelector("#addBookForm");
 const openDialogButton = document.querySelector("#openDialogButton");
@@ -10,6 +10,7 @@ function Book(title, author) {
   this.title = title;
   this.author = author;
   this.read = false;
+  this.id = crypto.randomUUID();
 }
 
 function addBookToLibrary(title, author) {
@@ -23,16 +24,60 @@ function displayBooks() {
   for (const book of myLibrary) {
     const bookDiv = document.createElement("div");
     const titleDiv = document.createElement("div");
-    const authorDiv = document.createElement("div")
-    bookDiv.className = "card";
-    titleDiv.className = "title";
+    const authorDiv = document.createElement("div");
+    const removeButton = document.createElement("button");
+    const switchDiv = document.createElement("div");
+    const switchLabel = document.createElement("label");
+    const switchCheckbox = document.createElement("input");
+    const switchSlider = document.createElement("span");
+    
+    bookDiv.className = "book-card";
+    bookDiv.dataset.uniqueIdentifier = book.id;
+    
+    titleDiv.className = "book-title";
     titleDiv.textContent = book.title;
-    authorDiv.className = "author";
+    
+    authorDiv.className = "book-author";
     authorDiv.textContent = book.author;
+    
+    removeButton.textContent = "Remove Book";
+    removeButton.addEventListener("click", () => {
+      removeBook(book.id);
+    });
+
+    switchDiv.className = "read-toggle";
+    switchDiv.textContent = "Read: ";
+    switchLabel.className = "switch";
+    switchCheckbox.type = "checkbox";
+    switchCheckbox.checked = book.read;
+    switchCheckbox.addEventListener("change", () => {
+      toggleRead(book.id);
+    });
+    switchSlider.className = "slider round";
 
     libraryDiv.appendChild(bookDiv);
     bookDiv.appendChild(titleDiv);
     bookDiv.appendChild(authorDiv);
+    bookDiv.appendChild(switchDiv);
+    bookDiv.appendChild(removeButton);
+    switchDiv.appendChild(switchLabel);
+    switchLabel.appendChild(switchCheckbox);
+    switchLabel.appendChild(switchSlider);
+  }
+}
+
+function removeBook(id) {
+  const bookIndex = myLibrary.findIndex(book => book.id === id);
+  if (bookIndex !== -1) {
+    myLibrary.splice(bookIndex, 1);
+    displayBooks();
+  }
+}
+
+function toggleRead(id) {
+  const book = myLibrary.find(book => book.id === id);
+  if (book) {
+    book.read = !book.read;
   }
 }
 
@@ -41,7 +86,7 @@ addNewBookButton.addEventListener("click", () => {
 });
 
 cancelButton.addEventListener("click", () => {
-  addNewBookDialog.close();
+  addNewBookDialogue.close();
 });
 
 addBookForm.addEventListener("submit", (event) => {
@@ -56,3 +101,4 @@ addBookForm.addEventListener("submit", (event) => {
   addBookForm.reset();
   addNewBookDialog.close();
 });
+

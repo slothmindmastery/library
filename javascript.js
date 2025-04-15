@@ -1,27 +1,53 @@
-const myLibrary = [];
 const libraryDiv = document.querySelector("#library");
 const addNewBookButton = document.querySelector("#addNewBookButton");
 const addNewBookDialogue = document.querySelector("#addNewBookDialog");
 const addBookForm = document.querySelector("#addBookForm");
-const openDialogButton = document.querySelector("#openDialogButton");
 const cancelButton = document.querySelector("#cancelButton");
 
-function Book(title, author) {
-  this.title = title;
-  this.author = author;
-  this.read = false;
-  this.id = crypto.randomUUID();
+class Library {
+  constructor() {
+    this.books = [];
+  }
+
+  addBook(title,author) {
+    const book = new Book(title,author);
+    this.books.push(book);
+  }
+
+  removeBook(id) {
+    this.books = this.books.filter(book => book.id !== id);
+  }
+
+  toggleRead(id) {
+    const book = this.books.find(book => book.id === id);
+    if (book) book.toggleRead();
+  }
+
+  getAllBooks() {
+    return this.books;
+  }
+ }
+
+class Book {
+  constructor(title,author) {
+    this.title = title;
+    this.author = author;
+    this.read = false;
+    this.id = crypto.randomUUID();
+  }
+
+  toggleRead() {
+    this.read = !this.read;      
+  }
 }
 
-function addBookToLibrary(title, author) {
-  myLibrary.push(new Book(title, author));
-}
+const myLibrary = new Library();
 
 function displayBooks() {
   while (libraryDiv.firstChild) {
     libraryDiv.removeChild(libraryDiv.firstChild);
   }
-  for (const book of myLibrary) {
+  for (const book of myLibrary.getAllBooks()) {
     const bookDiv = document.createElement("div");
     const titleDiv = document.createElement("div");
     const authorDiv = document.createElement("div");
@@ -67,18 +93,13 @@ function displayBooks() {
 }
 
 function removeBook(id) {
-  const bookIndex = myLibrary.findIndex(book => book.id === id);
-  if (bookIndex !== -1) {
-    myLibrary.splice(bookIndex, 1);
-    displayBooks();
-  }
+  myLibrary.removeBook(id);
+  displayBooks();
 }
 
 function toggleRead(id) {
-  const book = myLibrary.find(book => book.id === id);
-  if (book) {
-    book.read = !book.read;
-  }
+  myLibrary.toggleRead(id);
+  displayBooks();
 }
 
 addNewBookButton.addEventListener("click", () => {
@@ -96,7 +117,7 @@ addBookForm.addEventListener("submit", (event) => {
   const author = document.querySelector("#author").value;
 
   // Add book to the library
-  addBookToLibrary(title, author);
+  myLibrary.addBook(title, author);
   displayBooks();
   addBookForm.reset();
   addNewBookDialog.close();
